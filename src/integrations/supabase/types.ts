@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      candidates: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_url: string | null
+          name: string
+          position: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          position: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          position?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          created_at: string | null
+          email: string
+          has_voted: boolean | null
+          registration_number: string
+          voting_key: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          has_voted?: boolean | null
+          registration_number: string
+          voting_key: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          has_voted?: boolean | null
+          registration_number?: string
+          voting_key?: string
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          president_candidate_id: string | null
+          secretary_candidate_id: string | null
+          student_registration_number: string
+          vice_president_candidate_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          president_candidate_id?: string | null
+          secretary_candidate_id?: string | null
+          student_registration_number: string
+          vice_president_candidate_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          president_candidate_id?: string | null
+          secretary_candidate_id?: string | null
+          student_registration_number?: string
+          vice_president_candidate_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_president_candidate_id_fkey"
+            columns: ["president_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_secretary_candidate_id_fkey"
+            columns: ["secretary_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_student_registration_number_fkey"
+            columns: ["student_registration_number"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["registration_number"]
+          },
+          {
+            foreignKeyName: "votes_vice_president_candidate_id_fkey"
+            columns: ["vice_president_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
