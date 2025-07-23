@@ -6,16 +6,20 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Student } from '@/types/voting';
+import { QueueStatus } from '@/types/queue';
+import { useQueueSystem } from '@/hooks/useQueueSystem';
 
 interface AuthFormProps {
   onAuthSuccess: (student: Student) => void;
+  onQueueJoin: (queueStatus: QueueStatus) => void;
 }
 
-export function AuthForm({ onAuthSuccess }: AuthFormProps) {
+export function AuthForm({ onAuthSuccess, onQueueJoin }: AuthFormProps) {
   const [registrationNumber, setRegistrationNumber] = useState('');
   const [votingKey, setVotingKey] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { joinQueue } = useQueueSystem();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,29 +27,28 @@ export function AuthForm({ onAuthSuccess }: AuthFormProps) {
     setLoading(true);
 
     try {
-      // Check if student exists and key matches
-      const { data: student, error: fetchError } = await supabase
-        .from('students')
-        .select('*')
-        .eq('registration_number', registrationNumber)
-        .eq('voting_key', votingKey)
-        .single();
-
-      if (fetchError || !student) {
-        setError('Invalid registration number or voting key. Please try again.');
-        setLoading(false);
-        return;
+      // Use queue system to join queue or get active session
+      const queueStatus = await joinQueue(registrationNumber, votingKey);
+      
+      if (queueStatus.status === 'active') {
+        // User can vote immediately
+        const { data: student } = await supabase
+          .from('students')
+          .select('*')
+          .eq('registration_number', registrationNumber)
+          .single();
+        
+        if (student) {
+          onAuthSuccess(student);
+        }
+      } else if (queueStatus.status === 'queued') {
+        // User is in queue
+        onQueueJoin(queueStatus);
+      } else {
+        setError(queueStatus.error || 'Failed to join voting system');
       }
-
-      if (student.has_voted) {
-        setError('You have already voted.');
-        setLoading(false);
-        return;
-      }
-
-      onAuthSuccess(student);
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

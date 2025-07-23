@@ -1,1 +1,10 @@
 project_id = "tzmesmecgaijwqqhrxlb"
+
+[functions.join-queue]
+verify_jwt = false
+
+[functions.queue-heartbeat]
+verify_jwt = false
+
+[functions.queue-manager]
+verify_jwt = false
