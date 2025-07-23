@@ -64,30 +64,63 @@ export type Database = {
       }
       votes: {
         Row: {
+          associate_secretary_candidate_id: string | null
           created_at: string | null
           id: string
+          joint_secretary_candidate_id: string | null
+          joint_treasurer_candidate_id: string | null
           president_candidate_id: string | null
           secretary_candidate_id: string | null
           student_registration_number: string
+          treasurer_candidate_id: string | null
           vice_president_candidate_id: string | null
         }
         Insert: {
+          associate_secretary_candidate_id?: string | null
           created_at?: string | null
           id?: string
+          joint_secretary_candidate_id?: string | null
+          joint_treasurer_candidate_id?: string | null
           president_candidate_id?: string | null
           secretary_candidate_id?: string | null
           student_registration_number: string
+          treasurer_candidate_id?: string | null
           vice_president_candidate_id?: string | null
         }
         Update: {
+          associate_secretary_candidate_id?: string | null
           created_at?: string | null
           id?: string
+          joint_secretary_candidate_id?: string | null
+          joint_treasurer_candidate_id?: string | null
           president_candidate_id?: string | null
           secretary_candidate_id?: string | null
           student_registration_number?: string
+          treasurer_candidate_id?: string | null
           vice_president_candidate_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "votes_associate_secretary_candidate_id_fkey"
+            columns: ["associate_secretary_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_joint_secretary_candidate_id_fkey"
+            columns: ["joint_secretary_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_joint_treasurer_candidate_id_fkey"
+            columns: ["joint_treasurer_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "votes_president_candidate_id_fkey"
             columns: ["president_candidate_id"]
@@ -110,6 +143,13 @@ export type Database = {
             referencedColumns: ["registration_number"]
           },
           {
+            foreignKeyName: "votes_treasurer_candidate_id_fkey"
+            columns: ["treasurer_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "votes_vice_president_candidate_id_fkey"
             columns: ["vice_president_candidate_id"]
             isOneToOne: false
@@ -118,12 +158,86 @@ export type Database = {
           },
         ]
       }
+      voting_queue: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          last_heartbeat: string
+          queue_position: number
+          session_token: string
+          student_registration_number: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_heartbeat?: string
+          queue_position: number
+          session_token?: string
+          student_registration_number: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_heartbeat?: string
+          queue_position?: number
+          session_token?: string
+          student_registration_number?: string
+        }
+        Relationships: []
+      }
+      voting_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          last_heartbeat: string
+          session_token: string
+          status: string
+          student_registration_number: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_heartbeat?: string
+          session_token?: string
+          status: string
+          student_registration_number: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_heartbeat?: string
+          session_token?: string
+          status?: string
+          student_registration_number?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      assign_queue_position: {
+        Args: { reg_number: string }
+        Returns: number
+      }
+      cleanup_expired_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      promote_from_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          promoted_registration_number: string
+          session_token: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
